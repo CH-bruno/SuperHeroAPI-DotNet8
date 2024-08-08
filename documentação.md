@@ -667,7 +667,45 @@ private void LogHeroProperties(SuperHero hero)
     }
 }
 ```
-LogHeroProperties: Método privado que usa reflexão para iterar sobre as propriedades públicas de um SuperHero e registrar seus valores.
+#### Tipo do Método:
+
+O método é privado, o que significa que ele só pode ser chamado dentro da própria classe SuperHeroController.
+
+O método não retorna nenhum valor(void); ele apenas realiza ações, que são registrar as propriedades de um herói.
+
+#### Parâmetro:
+
+O método recebe um objeto do tipo SuperHero como parâmetro, representando o herói cujas propriedades serão registradas.
+
+#### Obtenção das Propriedades:
+
+```csharp
+var properties = hero.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+```
+hero.GetType(): Obtém o tipo do objeto hero, que é SuperHero.
+
+GetProperties(BindingFlags.Public | BindingFlags.Instance): Obtém uma lista de todas as propriedades públicas e de instância do tipo SuperHero. BindingFlags é um conjunto de flags usadas para especificar os tipos de membros que você deseja recuperar.
+
+#### Iteração Sobre as Propriedades:
+
+```csharp
+foreach (var prop in properties)
+```
+Itera sobre cada propriedade obtida no passo anterior.
+
+#### Registro do Nome e Valor das Propriedades:
+
+```csharp
+var propName = prop.Name;
+var propValue = prop.GetValue(hero, null) ?? "null";
+_logWriter.WriteLog($"{propName}: {propValue}");
+```
+prop.Name: Obtém o nome da propriedade.
+
+prop.GetValue(hero, null): Obtém o valor da propriedade para o objeto hero. O segundo parâmetro (null) é usado para o caso de propriedades indexadas, o que não se aplica aqui.
+?? "null": Se o valor da propriedade for null, substitui por "null". Isso é feito para garantir que a saída não tenha valores null.
+
+_logWriter.WriteLog($"{propName}: {propValue}"): Usa a interface ILogWriter para registrar a propriedade e seu valor. Isso pode ser feito tanto no console quanto em um arquivo, dependendo da implementação específica de ILogWriter.
 
 ### 4. Métodos HTTP
 
@@ -688,7 +726,18 @@ public async Task<ActionResult<List<SuperHero>>> GetAllHeroes()
 ```
 [HttpGet]: Define este método para responder a solicitações GET na rota base.
 
-Recupera todos os heróis do banco de dados, registra informações e retorna a lista.
+Descrição: Este método recupera todos os heróis armazenados no banco de dados.
+
+Ação:
+Registra o início da operação de recuperação com _logWriter.WriteLog("GET ALL");.
+
+Utiliza await _context.SuperHeroes.ToListAsync() para obter todos os heróis da tabela SuperHeroes.
+
+Registra o número de heróis retornados.
+
+Itera sobre cada herói e registra suas propriedades usando LogHeroProperties.
+
+Retorna a lista de heróis com um status HTTP 200 (OK).
 
 #### GET Hero by ID
 ``` csharp
@@ -709,7 +758,18 @@ public async Task<ActionResult<SuperHero>> GetHero(int id)
 ```
 [HttpGet("{id}")]: Define este método para responder a solicitações GET com um ID de herói.
 
-Recupera um herói específico, registra informações e retorna o herói ou um erro 404 se não encontrado.
+Descrição: Este método recupera um herói específico com base no ID fornecido.
+Ação:
+
+Registra a tentativa de recuperação do herói com o ID especificado.
+
+Usa await _context.SuperHeroes.FindAsync(id) para localizar o herói no banco de dados.
+
+Se o herói não for encontrado, registra a falha e retorna um status HTTP 404 (Not Found) com uma mensagem.
+
+Se o herói for encontrado, registra o nome do herói e suas propriedades.
+
+Retorna o herói com um status HTTP 200 (OK).
 
 #### POST Add Hero
 ``` csharp
@@ -725,7 +785,19 @@ public async Task<ActionResult<List<SuperHero>>> AddHero(SuperHero hero)
 ```
 [HttpPost]: Define este método para responder a solicitações POST para adicionar um novo herói.
 
-Adiciona o herói ao banco de dados, registra informações e retorna a lista atualizada de heróis.
+Descrição: Este método adiciona um novo herói ao banco de dados.
+
+Ação:
+
+Registra a tentativa de adição de um novo herói com o nome fornecido.
+
+Registra as propriedades do herói usando LogHeroProperties.
+
+Adiciona o herói ao contexto do banco de dados com _context.SuperHeroes.Add(hero).
+
+Salva as alterações no banco de dados com await _context.SaveChangesAsync().
+
+Retorna a lista atualizada de heróis com um status HTTP 200 (OK).
 
 #### PUT Update Hero
 ``` csharp
@@ -754,7 +826,21 @@ public async Task<ActionResult<List<SuperHero>>> UpdateHero(SuperHero updatedHer
 ```
 [HttpPut]: Define este método para responder a solicitações PUT para atualizar um herói existente.
 
-Atualiza o herói no banco de dados, registra as propriedades atualizadas e retorna a lista de heróis.
+Descrição: Este método atualiza um herói existente com base nos dados fornecidos.
+
+Ação:
+
+Registra a tentativa de atualização do herói com o ID fornecido.
+
+Localiza o herói existente no banco de dados com await _context.SuperHeroes.FindAsync(updatedHero.Id).
+
+Se o herói não for encontrado, registra a falha e retorna um status HTTP 404 (Not Found).
+
+Se o herói for encontrado, atualiza suas propriedades com os novos valores.
+
+Registra as propriedades atualizadas e salva as alterações no banco de dados com await _context.SaveChangesAsync().
+
+Retorna a lista atualizada de heróis com um status HTTP 200 (OK).
 
 #### DELETE Hero
 ``` csharp
@@ -780,4 +866,18 @@ public async Task<ActionResult<List<SuperHero>>> DeleteHero(int id)
 ```
 [HttpDelete("{id}")]: Define este método para responder a solicitações DELETE para excluir um herói pelo ID.
 
-Remove o herói do banco de dados, registra informações e retorna a lista atualizada de heróis.
+Descrição: Este método exclui um herói com base no ID fornecido.
+
+Ação:
+
+Registra a tentativa de exclusão do herói com o ID fornecido.
+
+Localiza o herói existente no banco de dados com await _context.SuperHeroes.FindAsync(id).
+
+Se o herói não for encontrado, registra a falha e retorna um status HTTP 404 (Not Found).
+
+Se o herói for encontrado, registra suas propriedades e o nome do herói a ser excluído.
+
+Remove o herói do contexto com _context.SuperHeroes.Remove(dbHero) e salva as alterações com await _context.SaveChangesAsync().
+
+Registra a exclusão bem-sucedida e retorna a lista atualizada de heróis com um status HTTP 200 (OK).
