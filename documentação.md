@@ -70,3 +70,47 @@ UseAuthorization(): Configura a autorização de requisições.
 MapControllers(): Mapeia os controladores para os endpoints.
 
 app.Run(): Inicia a aplicação.
+
+# appsettings.json
+
+É usado em projetos ASP.NET Core para configurar a aplicação, incluindo as strings de conexão, o nível de logging e outras configurações.
+
+### 1. ConnectionStrings
+
+```json
+"ConnectionStrings": {
+  "DefaultConnection": "Server=.\\SQLExpress;Database=SuperHeroDb;Trusted_Connection=true;TrustServerCertificate=true;"
+}
+```
+ConnectionStrings: Contém as strings de conexão para os bancos de dados que a aplicação utilizará.
+
+DefaultConnection: Nome da string de conexão usada no projeto. Neste caso, ela se conecta a um servidor SQL Server local (.\\SQLExpress) e ao banco de dados chamado SuperHeroDb.
+
+Trusted_Connection=true: Utiliza a autenticação integrada do Windows.
+
+TrustServerCertificate=true: Ignora problemas relacionados ao certificado SSL ao conectar-se ao banco de dados (útil em ambientes de desenvolvimento).
+
+### 2. Logging
+
+```json
+"Logging": {
+  "LogLevel": {
+    "Default": "Information",
+    "Microsoft.AspNetCore": "Warning"
+  }
+}
+```
+Logging: Configura as opções de logging para a aplicação.
+
+LogLevel: Define o nível mínimo de log que será registrado.
+
+Default: Define o nível de log padrão como Information, o que significa que logs de Information, Warning, Error, e Critical serão registrados.
+
+Microsoft.AspNetCore: Define o nível de log para os logs gerados por componentes Microsoft.AspNetCore como Warning, então somente logs de Warning, Error, e Critical serão registrados para essa categoria.
+
+### 3. AllowedHosts
+
+```json
+"AllowedHosts": "*"
+```
+AllowedHosts: Define quais hosts são permitidos para acessar a aplicação. O valor "*" significa que todos os hosts são permitidos, o que é comum em ambientes de desenvolvimento.
