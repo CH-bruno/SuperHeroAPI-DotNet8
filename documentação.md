@@ -603,3 +603,181 @@ Define diferentes perfis de inicialização para a aplicação:
 "launchUrl": "swagger": URL inicial a ser aberta no navegador.
 
 "environmentVariables": Define o ambiente como Desenvolvimento.
+
+# SuperHeroController.cs
+O código fornecido é um controlador ASP.NET Core que gerencia as operações CRUD (Criar, Ler, Atualizar e Excluir) para a entidade SuperHero. Ele usa o Entity Framework Core para interagir com o banco de dados e uma interface ILogWriter para registro de logs.
+
+### 1. Namespace e Usings
+``` csharp
+using System.Reflection;
+using Microsoft.AspNetCore.Http;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using SuperHeroAPI_DotNet8.Data;
+using SuperHeroAPI_DotNet8.Entities;
+using SuperHeroAPI_DotNet8.Interfaces;
+using SuperHeroAPI_DotNet8.Services;
+```
+System.Reflection: Usado para obter informações sobre propriedades de um objeto.
+
+Microsoft.AspNetCore.Http e Microsoft.AspNetCore.Mvc: Usados para construir controladores e gerenciar solicitações HTTP.
+
+Microsoft.EntityFrameworkCore: Usado para interagir com o banco de dados usando o Entity Framework Core.
+
+SuperHeroAPI_DotNet8.Data: Contém o DataContext para acesso ao banco de dados.
+
+SuperHeroAPI_DotNet8.Entities: Contém a definição da entidade SuperHero.
+
+SuperHeroAPI_DotNet8.Interfaces e SuperHeroAPI_DotNet8.Services: Contêm a interface ILogWriter e suas implementações para registro de logs.
+
+### Classe SuperHeroController
+``` csharp
+[Route("api/[controller]")]
+[ApiController]
+public class SuperHeroController : ControllerBase
+{
+    private readonly DataContext _context;
+    private readonly ILogWriter _logWriter;
+
+    public SuperHeroController(DataContext context, ILogWriter logWriter)
+    {
+        _context = context;
+        _logWriter = logWriter;
+    }
+```
+[Route("api/[controller]")]: Define a rota base para este controlador. [controller] será substituído pelo nome do controlador sem o sufixo "Controller", resultando em "api/superhero".
+
+[ApiController]: Configura o controlador para comportar-se como um controlador de API e aplica algumas convenções padrão.
+
+#### Dependências
+DataContext: Usado para interagir com o banco de dados.
+
+ILogWriter: Usado para registro de logs.
+
+### 3. Método LogHeroProperties
+``` csharp
+private void LogHeroProperties(SuperHero hero)
+{
+    var properties = hero.GetType().GetProperties(BindingFlags.Public | BindingFlags.Instance);
+    foreach (var prop in properties)
+    {
+        var propName = prop.Name;
+        var propValue = prop.GetValue(hero, null) ?? "null";
+        _logWriter.WriteLog($"{propName}: {propValue}");
+    }
+}
+```
+LogHeroProperties: Método privado que usa reflexão para iterar sobre as propriedades públicas de um SuperHero e registrar seus valores.
+
+### 4. Métodos HTTP
+
+#### GET All Heroes
+``` csharp
+[HttpGet]
+public async Task<ActionResult<List<SuperHero>>> GetAllHeroes()
+{
+    _logWriter.WriteLog("GET ALL");
+    var heroes = await _context.SuperHeroes.ToListAsync();
+    _logWriter.WriteLog($"Na lista tem {heroes.Count} heróis.\n");
+    foreach (var hero in heroes)
+    {
+        LogHeroProperties(hero);
+    }
+    return Ok(heroes);
+}
+```
+[HttpGet]: Define este método para responder a solicitações GET na rota base.
+
+Recupera todos os heróis do banco de dados, registra informações e retorna a lista.
+
+#### GET Hero by ID
+``` csharp
+[HttpGet("{id}")]
+public async Task<ActionResult<SuperHero>> GetHero(int id)
+{
+    _logWriter.WriteLog($"GET ID do herói com ID {id}.");
+    var hero = await _context.SuperHeroes.FindAsync(id);
+    if (hero is null)
+    {
+        _logWriter.WriteLog($"Herói com ID {id} não encontrado.");
+        return NotFound("Hero not found.\n");
+    }
+    _logWriter.WriteLog($"Herói com ID {id} encontrado: {hero.Name}.\n");
+    LogHeroProperties(hero);
+    return Ok(hero);
+}
+```
+[HttpGet("{id}")]: Define este método para responder a solicitações GET com um ID de herói.
+
+Recupera um herói específico, registra informações e retorna o herói ou um erro 404 se não encontrado.
+
+#### POST Add Hero
+``` csharp
+[HttpPost]
+public async Task<ActionResult<List<SuperHero>>> AddHero(SuperHero hero)
+{
+    _logWriter.WriteLog($"(POST)Adicionando novo herói: {hero.Name}.");
+    LogHeroProperties(hero);
+    _context.SuperHeroes.Add(hero);
+    await _context.SaveChangesAsync();
+    return Ok(await _context.SuperHeroes.ToListAsync());
+}
+```
+[HttpPost]: Define este método para responder a solicitações POST para adicionar um novo herói.
+
+Adiciona o herói ao banco de dados, registra informações e retorna a lista atualizada de heróis.
+
+#### PUT Update Hero
+``` csharp
+[HttpPut]
+public async Task<ActionResult<List<SuperHero>>> UpdateHero(SuperHero updatedHero)
+{
+    _logWriter.WriteLog($"(PUT)Atualizando o herói com ID {updatedHero.Id}.\n");
+    var dbHero = await _context.SuperHeroes.FindAsync(updatedHero.Id);
+    if (dbHero is null)
+    {
+        _logWriter.WriteLog($"Herói com ID {updatedHero.Id} não encontrado.");
+        return NotFound("Hero not found.\n");
+    }
+    dbHero.Name = updatedHero.Name;
+    dbHero.FirstName = updatedHero.FirstName;
+    dbHero.LastName = updatedHero.LastName;
+    dbHero.Place = updatedHero.Place;
+
+    _logWriter.WriteLog("Propriedades do herói atualizadas:");
+    LogHeroProperties(dbHero);
+    await _context.SaveChangesAsync();
+    _logWriter.WriteLog($"Herói {dbHero.Name} atualizado com sucesso.\n");
+
+    return Ok(await _context.SuperHeroes.ToListAsync());
+}
+```
+[HttpPut]: Define este método para responder a solicitações PUT para atualizar um herói existente.
+
+Atualiza o herói no banco de dados, registra as propriedades atualizadas e retorna a lista de heróis.
+
+#### DELETE Hero
+``` csharp
+[HttpDelete("{id}")]
+public async Task<ActionResult<List<SuperHero>>> DeleteHero(int id)
+{
+    _logWriter.WriteLog($"(Tentativa de exclusão do herói com ID {id}.");
+    var dbHero = await _context.SuperHeroes.FindAsync(id);
+    if (dbHero is null)
+    {
+        _logWriter.WriteLog($"Herói com ID {id} não encontrado.");
+        return NotFound("Hero not found.\n");
+    }
+    _logWriter.WriteLog($"Herói encontrado para exclusão: {dbHero.Name}.\n");
+    LogHeroProperties(dbHero);
+
+    _context.SuperHeroes.Remove(dbHero);
+    await _context.SaveChangesAsync();
+    _logWriter.WriteLog($"Herói {dbHero.Name} excluído com sucesso.\n");
+
+    return Ok(await _context.SuperHeroes.ToListAsync());
+}
+```
+[HttpDelete("{id}")]: Define este método para responder a solicitações DELETE para excluir um herói pelo ID.
+
+Remove o herói do banco de dados, registra informações e retorna a lista atualizada de heróis.
