@@ -8,7 +8,7 @@ A aplicação adiciona vários serviços ao contêiner de injeção de dependên
 builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
-´´´
+```
   
 AddControllers(): Adiciona suporte para controladores, permitindo a criação de APIs RESTful.
 AddEndpointsApiExplorer(): Gera descrições de endpoints para suporte a ferramentas como o Swagger.
@@ -23,7 +23,7 @@ builder.Services.AddDbContext<DataContext>(options =>
 {
     options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 });
-´´´
+```
 AddDbContext<DataContext>(): Registra o DataContext no contêiner de serviços usando o SQL Server como banco de dados, com a string de conexão definida no arquivo de configuração (por exemplo, appsettings.json).
 
 ### 3. Registrando Serviços de Log
@@ -33,7 +33,7 @@ O projeto inclui dois serviços de logging personalizados:
 ```csharp
 builder.Services.AddSingleton<ILogWriter, ConsoleLogWriter>();
 builder.Services.AddSingleton<ILogWriter>(provider => new FileLogWriter("log.txt"));
-´´´
+```
 AddSingleton<ILogWriter, ConsoleLogWriter>(): Registra o ConsoleLogWriter como uma implementação da interface ILogWriter, para logs no console.
 AddSingleton<ILogWriter>(provider => new FileLogWriter("log.txt")): Registra o FileLogWriter, que grava logs em um arquivo de texto.
   
@@ -53,7 +53,7 @@ app.UseHttpsRedirection();
 app.UseAuthorization();
 app.MapControllers();
 app.Run();
-´´´
+```
   
 app.Environment.IsDevelopment(): Verifica se a aplicação está em ambiente de desenvolvimento. Se estiver, ativa o Swagger e a interface Swagger UI.
 UseSwagger()/UseSwaggerUI(): Configura a aplicação para usar o Swagger para geração de documentação da API.
