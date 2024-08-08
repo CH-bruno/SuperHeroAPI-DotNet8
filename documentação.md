@@ -171,9 +171,46 @@ Abstração: A interface ILogWriter permite que diferentes implementações de e
 
 Implementação: Classes que implementam esta interface, como ConsoleLogWriter ou FileLogWriter, fornecerão a lógica específica para como os logs serão escritos (por exemplo, no console ou em um arquivo).
 
-
-
 void: O método não retorna um valor.
 
 string message: O método aceita uma string como parâmetro, que representa a mensagem de log a ser escrita.
 
+# ConsoleLogWriter.cs
+
+Este código define a classe ConsoleLogWriter no namespace SuperHeroAPI_DotNet8.Services, que implementa a interface ILogWriter. Esta classe é responsável por registrar mensagens de log no console, incluindo a data e hora em que a mensagem foi escrita.
+
+### 1.Using
+```csharp
+using SuperHeroAPI_DotNet8.Interfaces;
+
+namespace SuperHeroAPI_DotNet8.Services
+```
+using SuperHeroAPI_DotNet8.Interfaces: Importa a interface ILogWriter para que ela possa ser implementada pela classe ConsoleLogWriter.
+
+namespace SuperHeroAPI_DotNet8.Services: Agrupa a classe ConsoleLogWriter dentro de um namespace que provavelmente contém outras classes relacionadas a serviços na aplicação.
+
+### 2.Classe ConsoleLogWriter
+
+```csharp
+public class ConsoleLogWriter : ILogWriter
+{
+    public void WriteLog(string message)
+    {
+        Console.WriteLine($"{DateTime.Now}: {message}");
+    }
+}
+```
+
+public class ConsoleLogWriter : ILogWriter: Define uma classe pública ConsoleLogWriter que implementa a interface ILogWriter. Isso significa que a classe deve fornecer uma implementação para o método WriteLog definido na interface.
+
+WriteLog(string message): Este método, exigido pela interface ILogWriter, implementa a funcionalidade de registrar uma mensagem de log.
+
+Console.WriteLine($"{DateTime.Now}: {message}");: Escreve a mensagem no console, precedida pela data e hora atuais.
+
+DateTime.Now: Retorna a data e hora atuais.
+
+$"{DateTime.Now}: {message}": Usando interpolação de strings, a mensagem de log é formatada para incluir a data e hora no formato "YYYY-MM-DD HH:MM:SS: Mensagem".
+
+### 3.Funcionamento
+
+Logging ao Console: Quando o método WriteLog é chamado, ele escreve a mensagem especificada no console, prefixada com a data e hora atuais. Isso facilita a análise dos logs, pois cada entrada é claramente associada a um momento específico.
