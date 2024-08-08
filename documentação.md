@@ -630,7 +630,7 @@ SuperHeroAPI_DotNet8.Entities: Contém a definição da entidade SuperHero.
 
 SuperHeroAPI_DotNet8.Interfaces e SuperHeroAPI_DotNet8.Services: Contêm a interface ILogWriter e suas implementações para registro de logs.
 
-### Classe SuperHeroController
+### 2.Classe SuperHeroController
 ``` csharp
 [Route("api/[controller]")]
 [ApiController]
